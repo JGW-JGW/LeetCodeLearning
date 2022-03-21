@@ -113,6 +113,84 @@ class Solution:
         return list(max_of_all)
 
 
+"""
+重构矩阵 rightward_continuous_zero_matrix 和 downward_continuous_zero_matrix
+rightward_continuous_zero_matrix[r][c] 表示 matrix[r][c] 从自身开始向右有多少个连续的 0
+downward_continuous_zero_matrix[r][c] 表示 matrix[r][c] 从自身开始向下有多少个连续的 0
+
+记 rightward_continuous_zero_matrix 为 rczm
+记 downward_continuous_zero_matrix 为 dczm
+
+
+对于给定的行标列标 (r, c)，能组成的最大边长为 min(rczm[r][c], dczm[r][c]
+对于给定的行标列标 (r, c) 和边长 a，能够组成正方形的条件为
+dczm[r][c + a - 1] >= a 且 rczm[r + a - 1][c] >= a
+"""
+
+
+class Solution(object):
+    @staticmethod
+    def cal_rczm(matrix: List[List[int]], n: int, rczm: List[List[int]]) -> None:
+        for r in range(n - 1, -1, -1):
+            count = 0
+            for c in range(n - 1, -1, -1):
+                if matrix[r][c] == 1:
+                    count = 0
+                else:
+                    count += 1
+
+                rczm[r][c] = count
+
+        return
+
+    @staticmethod
+    def cal_dczm(matrix: List[List[int]], n: int, dczm: List[List[int]]) -> None:
+        for c in range(n - 1, -1, -1):
+            count = 0
+            for r in range(n - 1, -1, -1):
+                if matrix[r][c] == 1:
+                    count = 0
+                else:
+                    count += 1
+
+                dczm[r][c] = count
+
+        return
+
+    @staticmethod
+    def is_valid_square(rczm: List[List[int]], dczm: List[List[int]], n: int, r: int, c: int, a: int) -> bool:
+        if r + a - 1 >= n or c + a - 1 >= n:
+            return False
+
+        if rczm[r + a - 1][c] >= a and dczm[r][c + a - 1] >= a:
+            return True
+
+        return False
+
+    def findSquare(self, matrix: List[List[int]]) -> List[int]:
+        n = len(matrix)
+        rczm = [[0 for _ in range(n)] for _ in range(n)]
+        dczm = [[0 for _ in range(n)] for _ in range(n)]
+        max_of_all = (-1, -1, 0)
+
+        self.cal_rczm(matrix, n, rczm)
+        self.cal_dczm(matrix, n, dczm)
+
+        for r in range(n):
+            for c in range(n):
+                max_a = min(rczm[r][c], dczm[r][c])
+
+                while max_a > 0:
+                    if self.is_valid_square(rczm, dczm, n, r, c, max_a):
+                        break
+                    max_a -= 1
+
+                if max_a > max_of_all[2]:
+                    max_of_all = (r, c, max_a)
+
+        return list(max_of_all) if max_of_all[2] > 0 else []
+
+
 if __name__ == '__main__':
     s = Solution()
 
